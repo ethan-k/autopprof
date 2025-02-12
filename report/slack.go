@@ -1,6 +1,7 @@
 package report
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io"
@@ -53,12 +54,19 @@ func (s *SlackReporter) ReportCPUProfile(
 		filename = fmt.Sprintf(CPUProfileFilenameFmt, s.app, hostname, now)
 		comment  = fmt.Sprintf(cpuCommentFmt, ci.UsagePercentage, ci.ThresholdPercentage)
 	)
-	if _, err := s.client.UploadFileContext(ctx, slack.FileUploadParameters{
-		Reader:         r,
+	data, err := io.ReadAll(r)
+	if err != nil {
+		return fmt.Errorf("autopprof: failed to read the profile file: %w", err)
+	}
+	if len(data) == 0 {
+		return fmt.Errorf("autopprof: profile file size is 0")
+	}
+	if _, err := s.client.UploadFileV2Context(ctx, slack.UploadFileV2Parameters{
+		Reader:         bytes.NewReader(data),
 		Filename:       filename,
 		Title:          filename,
 		InitialComment: comment,
-		Channels:       []string{s.channel},
+		Channel:        s.channel,
 	}); err != nil {
 		return fmt.Errorf("autopprof: failed to upload a file to Slack channel: %w", err)
 	}
@@ -75,12 +83,21 @@ func (s *SlackReporter) ReportHeapProfile(
 		filename = fmt.Sprintf(HeapProfileFilenameFmt, s.app, hostname, now)
 		comment  = fmt.Sprintf(memCommentFmt, mi.UsagePercentage, mi.ThresholdPercentage)
 	)
-	if _, err := s.client.UploadFileContext(ctx, slack.FileUploadParameters{
-		Reader:         r,
+	data, err := io.ReadAll(r)
+	if err != nil {
+		return fmt.Errorf("autopprof: failed to read the profile file: %w", err)
+	}
+	filesize := len(data)
+	if filesize == 0 {
+		return fmt.Errorf("autopprof: profile file size is 0")
+	}
+	if _, err := s.client.UploadFileV2Context(ctx, slack.UploadFileV2Parameters{
+		Reader:         bytes.NewReader(data),
 		Filename:       filename,
+		FileSize:       filesize,
 		Title:          filename,
 		InitialComment: comment,
-		Channels:       []string{s.channel},
+		Channel:        s.channel,
 	}); err != nil {
 		return fmt.Errorf("autopprof: failed to upload a file to Slack channel: %w", err)
 	}
@@ -97,12 +114,19 @@ func (s *SlackReporter) ReportGoroutineProfile(
 		filename = fmt.Sprintf(GoroutineProfileFilenameFmt, s.app, hostname, now)
 		comment  = fmt.Sprintf(goroutineCommentFmt, gi.Count, gi.ThresholdCount)
 	)
-	if _, err := s.client.UploadFileContext(ctx, slack.FileUploadParameters{
-		Reader:         r,
+	data, err := io.ReadAll(r)
+	if err != nil {
+		return fmt.Errorf("autopprof: failed to read the profile file: %w", err)
+	}
+	if len(data) == 0 {
+		return fmt.Errorf("autopprof: profile file size is 0")
+	}
+	if _, err := s.client.UploadFileV2Context(ctx, slack.UploadFileV2Parameters{
+		Reader:         bytes.NewReader(data),
 		Filename:       filename,
 		Title:          filename,
 		InitialComment: comment,
-		Channels:       []string{s.channel},
+		Channel:        s.channel,
 	}); err != nil {
 		return fmt.Errorf("autopprof: failed to upload a file to Slack channel: %w", err)
 	}
