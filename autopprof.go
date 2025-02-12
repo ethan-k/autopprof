@@ -10,8 +10,8 @@ import (
 	"log"
 	"time"
 
-	"github.com/daangn/autopprof/queryer"
-	"github.com/daangn/autopprof/report"
+	"github.com/ethan-k/autopprof/queryer"
+	"github.com/ethan-k/autopprof/report"
 )
 
 const (
