@@ -150,8 +150,9 @@ func (ap *autoPprof) loadCPUQuota() error {
 	}
 	// If memory profiling is enabled, just logs the error and
 	//  disables the cpu profiling.
-	log.Println(
-		"autopprof: disable the cpu profiling due to the CPU quota isn't set",
+	log.Printf(
+		"autopprof: disable the cpu profiling due to the CPU quota isn't set: %v",
+		err,
 	)
 	ap.disableCPUProf = true
 	return nil
